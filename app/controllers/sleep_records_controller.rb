@@ -4,30 +4,26 @@ class SleepRecordsController < ApplicationController
   def create
     sleep_record = current_user.sleep_records.create!(create_params)
 
-    render json: {
-      data: {
-        sleep_record: {
-          id: sleep_record.id,
-          sleep_at: sleep_record.sleep_at
-        }
+    render_json(:created, {
+      sleep_record: {
+        id: sleep_record.id,
+        sleep_at: sleep_record.sleep_at
       }
-    }, status: :created
+    })
   end
 
   def update
     sleep_record = current_user.sleep_records.find(params[:id])
     sleep_record.update!(update_params)
 
-    render json: {
-      data: {
-        sleep_record: {
-          id: sleep_record.id,
-          sleep_at: sleep_record.sleep_at,
-          wake_at: sleep_record.wake_at,
-          duration: sleep_record.duration
-        }
+    render_json(:ok, {
+      sleep_record: {
+        id: sleep_record.id,
+        sleep_at: sleep_record.sleep_at,
+        wake_at: sleep_record.wake_at,
+        duration: sleep_record.duration
       }
-    }, status: :ok
+    })
   end
 
   private

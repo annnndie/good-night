@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::API
   include ErrorHandler
-  
+  include Pagy::Backend
+
   before_action :authenticate_user!
 
   private
@@ -16,5 +17,19 @@ class ApplicationController < ActionController::API
 
   def current_user
     @current_user
+  end
+
+  def render_json(status, results = nil)
+    render json: (results.present? ? { data: results } : {}), status: status
+  end
+
+  def render_json_with_page(status, results = {})
+    data = {
+      current_page: @pagy.page,
+      total_pages: @pagy.pages,
+      total_items: @pagy.count
+    }.merge(results)
+
+    render json: { data: data }, status: status
   end
 end
