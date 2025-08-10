@@ -27,6 +27,9 @@ Rails.application.configure do
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
+  
+  # Allow localhost for RSpec tests
+  config.hosts << "localhost"
 
   # Store uploaded files on the local file system in a temporary directory.
   config.active_storage.service = :test
@@ -37,7 +40,7 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :test
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  config.action_mailer.default_url_options = { host: "localhost" }
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
