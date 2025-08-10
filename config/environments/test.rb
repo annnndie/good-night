@@ -27,7 +27,7 @@ Rails.application.configure do
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
-  
+
   # Allow localhost for RSpec tests
   config.hosts << "localhost"
 
