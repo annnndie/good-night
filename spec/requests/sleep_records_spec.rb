@@ -3,6 +3,38 @@ require 'rails_helper'
 RSpec.describe 'Sleep Records API', type: :request do
   let(:user) { create(:user) }
 
+  describe 'GET /sleep_records' do
+    context 'with valid user' do
+      context 'with sleep records' do
+        let!(:sleep_record1) { create(:sleep_record, user: user) }
+        let!(:sleep_record2) { create(:sleep_record, user: user) }
+
+        it 'returns sleep records with pagination' do
+          get '/sleep_records',
+              headers: { 'X-User-ID' => user.id },
+              as: :json
+
+          expect(response).to have_http_status(:ok)
+          
+          sleep_records = json_response['data']['sleep_records']
+          expect(sleep_records).to be_an(Array)
+          expect(sleep_records.length).to eq(2)
+          expect(json_response['data']['current_page']).to eq(1)
+          expect(json_response['data']['total_items']).to eq(2)
+          expect(json_response['data']['total_pages']).to eq(1)
+        end
+      end
+    end
+
+    context 'without user header' do
+      it 'returns unauthorized' do
+        get '/sleep_records', as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
   describe 'POST /sleep_records' do
     context 'with valid user' do
       let(:specific_time) { '2025-01-15 23:30:00' }

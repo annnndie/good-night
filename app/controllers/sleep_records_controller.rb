@@ -1,5 +1,18 @@
 class SleepRecordsController < ApplicationController
-  def index; end
+  def index
+    @pagy, sleep_records = pagy(current_user.sleep_records.order(created_at: :desc))
+
+    render_json_with_page(:ok, {
+      sleep_records: sleep_records.map do |record|
+        {
+          id: record.id,
+          sleep_at: record.sleep_at,
+          wake_at: record.wake_at,
+          duration: record.duration
+        }
+      end
+    })
+  end
 
   def create
     sleep_record = current_user.sleep_records.create!(create_params)
