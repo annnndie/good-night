@@ -9,7 +9,11 @@ RSpec.describe 'Sleep Records API', type: :request do
       it 'creates a new sleep record with specified time' do
         expect {
           post '/sleep_records',
-               params: { sleep_at: specific_time },
+               params: {
+                 sleep_record: {
+                   sleep_at: specific_time
+                 }
+               },
                headers: { 'X-User-ID' => user.id },
                as: :json
         }.to change(SleepRecord, :count).by(1)
@@ -42,7 +46,7 @@ RSpec.describe 'Sleep Records API', type: :request do
              as: :json
 
         expect(response).to have_http_status(:bad_request)
-        expect(json_response['errors']).to eq('sleep_at parameter is required')
+        expect(json_response['errors']).to eq('Parameter is required')
       end
     end
 
@@ -59,6 +63,76 @@ RSpec.describe 'Sleep Records API', type: :request do
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response['errors']).to be_an(Array)
+      end
+    end
+  end
+
+  describe 'PATCH /sleep_records/:id' do
+    let!(:sleep_record) { create(:sleep_record, user: user) }
+    let(:wake_time) { '2025-01-16 07:30:00' }
+
+    context 'with valid user and record' do
+      it 'updates wake_at time and returns complete record' do
+        patch "/sleep_records/#{sleep_record.id}",
+              params: {
+                sleep_record: {
+                  wake_at: wake_time
+                }
+              },
+              headers: { 'X-User-ID' => user.id },
+              as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response['data']['sleep_record']).to have_key('id')
+        expect(json_response['data']['sleep_record']).to have_key('sleep_at')
+        expect(json_response['data']['sleep_record']).to have_key('wake_at')
+        expect(json_response['data']['sleep_record']).to have_key('duration')
+
+        sleep_record.reload
+        expect(sleep_record.wake_at).to be_present
+        expect(sleep_record.duration).to be_present
+      end
+    end
+
+    context 'without wake_at parameter' do
+      it 'returns parameter missing error' do
+        patch "/sleep_records/#{sleep_record.id}",
+              params: { sleep_record: {} },
+              headers: { 'X-User-ID' => user.id },
+              as: :json
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response['errors']).to eq('Parameter is required')
+      end
+    end
+
+    context 'with non-existent record' do
+      it 'returns not found error' do
+        patch '/sleep_records/999999',
+              params: {
+                sleep_record: {
+                  wake_at: wake_time
+                }
+              },
+              headers: { 'X-User-ID' => user.id },
+              as: :json
+
+        expect(response).to have_http_status(:not_found)
+        expect(json_response['errors']).to eq('Sleep record not found')
+      end
+    end
+
+    context 'without user header' do
+      it 'returns unauthorized' do
+        patch "/sleep_records/#{sleep_record.id}",
+              params: {
+                sleep_record: {
+                  wake_at: wake_time
+                }
+              },
+              as: :json
+
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
