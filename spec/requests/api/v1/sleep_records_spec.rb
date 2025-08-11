@@ -10,12 +10,12 @@ RSpec.describe 'Sleep Records API', type: :request do
         let!(:sleep_record2) { create(:sleep_record, user: user) }
 
         it 'returns sleep records with pagination' do
-          get '/sleep_records',
+          get '/api/v1/sleep_records',
               headers: { 'X-User-ID' => user.id },
               as: :json
 
           expect(response).to have_http_status(:ok)
-          
+
           sleep_records = json_response['data']['sleep_records']
           expect(sleep_records).to be_an(Array)
           expect(sleep_records.length).to eq(2)
@@ -28,7 +28,7 @@ RSpec.describe 'Sleep Records API', type: :request do
 
     context 'without user header' do
       it 'returns unauthorized' do
-        get '/sleep_records', as: :json
+        get '/api/v1/sleep_records', as: :json
 
         expect(response).to have_http_status(:unauthorized)
       end
@@ -40,7 +40,7 @@ RSpec.describe 'Sleep Records API', type: :request do
       let(:specific_time) { '2025-01-15 23:30:00' }
       it 'creates a new sleep record with specified time' do
         expect {
-          post '/sleep_records',
+          post '/api/v1/sleep_records',
                params: {
                  sleep_record: {
                    sleep_at: specific_time
@@ -64,7 +64,7 @@ RSpec.describe 'Sleep Records API', type: :request do
     context 'without user header' do
       it 'returns unauthorized' do
         expect {
-          post '/sleep_records', as: :json
+          post '/api/v1/sleep_records', as: :json
         }.not_to change(SleepRecord, :count)
 
         expect(response).to have_http_status(:unauthorized)
@@ -73,7 +73,7 @@ RSpec.describe 'Sleep Records API', type: :request do
 
     context 'when sleep_at parameter is missing' do
       it 'returns parameter missing error' do
-        post '/sleep_records',
+        post '/api/v1/sleep_records',
              headers: { 'X-User-ID' => user.id },
              as: :json
 
@@ -88,7 +88,7 @@ RSpec.describe 'Sleep Records API', type: :request do
         allow_any_instance_of(User).to receive_message_chain(:sleep_records, :create!)
           .and_raise(ActiveRecord::RecordInvalid.new(invalid_record))
 
-        post '/sleep_records',
+        post '/api/v1/sleep_records',
              params: { sleep_at: '2025-01-15 23:30:00' },
              headers: { 'X-User-ID' => user.id },
              as: :json
@@ -105,7 +105,7 @@ RSpec.describe 'Sleep Records API', type: :request do
 
     context 'with valid user and record' do
       it 'updates wake_at time and returns complete record' do
-        patch "/sleep_records/#{sleep_record.id}",
+        patch "/api/v1/sleep_records/#{sleep_record.id}",
               params: {
                 sleep_record: {
                   wake_at: wake_time
@@ -128,7 +128,7 @@ RSpec.describe 'Sleep Records API', type: :request do
 
     context 'without wake_at parameter' do
       it 'returns parameter missing error' do
-        patch "/sleep_records/#{sleep_record.id}",
+        patch "/api/v1/sleep_records/#{sleep_record.id}",
               params: { sleep_record: {} },
               headers: { 'X-User-ID' => user.id },
               as: :json
@@ -140,7 +140,7 @@ RSpec.describe 'Sleep Records API', type: :request do
 
     context 'with non-existent record' do
       it 'returns not found error' do
-        patch '/sleep_records/999999',
+        patch '/api/v1/sleep_records/999999',
               params: {
                 sleep_record: {
                   wake_at: wake_time
@@ -156,7 +156,7 @@ RSpec.describe 'Sleep Records API', type: :request do
 
     context 'without user header' do
       it 'returns unauthorized' do
-        patch "/sleep_records/#{sleep_record.id}",
+        patch "/api/v1/sleep_records/#{sleep_record.id}",
               params: {
                 sleep_record: {
                   wake_at: wake_time

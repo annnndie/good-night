@@ -1,4 +1,4 @@
-class SleepRecordsController < ApplicationController
+class Api::V1::SleepRecordsController < ApplicationController
   def index
     @pagy, sleep_records = pagy(current_user.sleep_records.order(created_at: :desc))
 
