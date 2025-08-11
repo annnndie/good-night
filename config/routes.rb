@@ -3,6 +3,12 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :sleep_records, only: %i[index create update]
+      resources :users, only: [] do
+        collection do
+          post :follow
+          post :unfollow
+        end
+      end
     end
   end
 end
