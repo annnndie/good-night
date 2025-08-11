@@ -19,6 +19,7 @@ RSpec.describe 'Users API', type: :request do
         expect(json_response['data']['follow']).to have_key('followed_id')
         expect(json_response['data']['follow']['follower_id']).to eq(user.id)
         expect(json_response['data']['follow']['followed_id']).to eq(other_user.id)
+        expect(user.following?(other_user)).to be_truthy
       end
     end
 
@@ -60,6 +61,7 @@ RSpec.describe 'Users API', type: :request do
         }.to change(Follow, :count).by(-1)
 
         expect(response).to have_http_status(:ok)
+        expect(user.following?(other_user)).to be_falsey
       end
     end
 

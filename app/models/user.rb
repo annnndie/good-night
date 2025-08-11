@@ -8,4 +8,17 @@ class User < ApplicationRecord
   has_many :followers, through: :passive_follows, source: :follower
 
   validates :name, presence: true
+
+  def follow(user)
+    active_follows.find_or_create_by!(followed: user)
+  end
+
+  def unfollow(user)
+    follow_record = active_follows.find_by!(followed: user)
+    follow_record.destroy
+  end
+
+  def following?(user)
+    following.include?(user)
+  end
 end

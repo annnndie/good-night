@@ -2,7 +2,7 @@ class Api::V1::UsersController < ApplicationController
   before_action :find_followed_user
 
   def follow
-    current_user.active_follows.find_or_create_by!(followed: @followed_user)
+    current_user.follow(@followed_user)
 
     render_json(:created, {
       follow: {
@@ -13,8 +13,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def unfollow
-    follow_record = current_user.active_follows.find_by!(followed: @followed_user)
-    follow_record.destroy
+    current_user.unfollow(@followed_user)
 
     render_json(:ok)
   end
