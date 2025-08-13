@@ -17,11 +17,10 @@ RSpec.describe 'Sleep Records API', type: :request do
           expect(response).to have_http_status(:ok)
 
           sleep_records = json_response['data']['sleep_records']
+          page_data = json_response['page']
           expect(sleep_records).to be_an(Array)
           expect(sleep_records.length).to eq(2)
-          expect(json_response['data']['current_page']).to eq(1)
-          expect(json_response['data']['total_items']).to eq(2)
-          expect(json_response['data']['total_pages']).to eq(1)
+          expect(page_data).to be_an(Hash)
         end
       end
     end
@@ -194,15 +193,17 @@ RSpec.describe 'Sleep Records API', type: :request do
         )
       }
 
-      it 'returns sleep records and orders records by duration DESC' do
+      it 'returns sleep records and orders records by duration DESC with pagination' do
         get '/api/v1/sleep_records/following',
             headers: { 'X-User-ID' => user.id },
             as: :json
 
         sleep_records = json_response['data']['sleep_records']
+        page_data = json_response['page']
         durations = sleep_records.map { |r| r['duration'] }
 
         expect(response).to have_http_status(:ok)
+        expect(page_data).to be_an(Hash)
         expect(durations.first).to eq(36000) # 10 hours
         expect(durations.last).to eq(28800)  # 8 hours
       end

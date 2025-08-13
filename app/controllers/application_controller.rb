@@ -24,12 +24,11 @@ class ApplicationController < ActionController::API
   end
 
   def render_json_with_page(status, results = {})
-    data = {
+    page = {
       current_page: @pagy.page,
       total_pages: @pagy.pages,
       total_items: @pagy.count
-    }.merge(results)
-
-    render json: { data: data }, status: status
+    }
+    render json: { page: page, data: results }, status: status
   end
 end
