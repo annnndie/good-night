@@ -1,4 +1,6 @@
 class Api::V1::SleepRecordsController < ApplicationController
+  include DatetimeValidation
+
   def index
     @pagy, sleep_records = pagy(current_user.sleep_records.order(created_at: :desc))
 
@@ -23,7 +25,7 @@ class Api::V1::SleepRecordsController < ApplicationController
 
     @pagy, sleep_records = pagy(record_query)
 
-    render_json_with_page(:ok, { 
+    render_json_with_page(:ok, {
       sleep_records: sleep_records.map do |record|
         {
           id: record.id,
@@ -31,7 +33,7 @@ class Api::V1::SleepRecordsController < ApplicationController
           sleep_at: record.sleep_at,
           wake_at: record.wake_at,
           duration: record.duration
-        } 
+        }
       end
     })
   end
@@ -64,10 +66,14 @@ class Api::V1::SleepRecordsController < ApplicationController
   private
 
   def create_params
-    params.require(:sleep_record).permit(:sleep_at)
+    params.require(:sleep_record).permit(:sleep_at).tap do |permitted|
+      validate_datetime_params(permitted)
+    end
   end
 
   def update_params
-    params.require(:sleep_record).permit(:wake_at)
+    params.require(:sleep_record).permit(:wake_at).tap do |permitted|
+      validate_datetime_params(permitted)
+    end
   end
 end

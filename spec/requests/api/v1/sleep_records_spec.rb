@@ -77,7 +77,23 @@ RSpec.describe 'Sleep Records API', type: :request do
              as: :json
 
         expect(response).to have_http_status(:bad_request)
-        expect(json_response['errors']).to eq('Parameter is required')
+        expect(json_response['errors']).to eq(['Parameter is required'])
+      end
+    end
+
+    context 'when sleep_at is invalid datetime format' do
+      it 'returns invalid datetime error' do
+        post '/api/v1/sleep_records',
+             params: {
+               sleep_record: {
+                 sleep_at: 'invalid-datetime'
+               }
+             },
+             headers: { 'X-User-ID' => user.id },
+             as: :json
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response['errors']).to eq(['sleep_at must be a valid datetime format'])
       end
     end
 
@@ -133,7 +149,23 @@ RSpec.describe 'Sleep Records API', type: :request do
               as: :json
 
         expect(response).to have_http_status(:bad_request)
-        expect(json_response['errors']).to eq('Parameter is required')
+        expect(json_response['errors']).to eq(['Parameter is required'])
+      end
+    end
+
+    context 'when wake_at is invalid datetime format' do
+      it 'returns invalid datetime error' do
+        patch "/api/v1/sleep_records/#{sleep_record.id}",
+              params: {
+                sleep_record: {
+                  wake_at: 'invalid-datetime'
+                }
+              },
+              headers: { 'X-User-ID' => user.id },
+              as: :json
+
+        expect(response).to have_http_status(:bad_request)
+        expect(json_response['errors']).to eq(['wake_at must be a valid datetime format'])
       end
     end
 
@@ -149,7 +181,7 @@ RSpec.describe 'Sleep Records API', type: :request do
               as: :json
 
         expect(response).to have_http_status(:not_found)
-        expect(json_response['errors']).to eq('Sleep record not found')
+        expect(json_response['errors']).to eq(['Sleep record not found'])
       end
     end
 
@@ -176,18 +208,18 @@ RSpec.describe 'Sleep Records API', type: :request do
     end
 
     context 'with sleep records from followed users' do
-      let!(:record1) { 
-        create(:sleep_record, 
-          user: followed_user1, 
-          sleep_at: 2.days.ago, 
+      let!(:record1) {
+        create(:sleep_record,
+          user: followed_user1,
+          sleep_at: 2.days.ago,
           wake_at: 2.days.ago + 8.hours,
           created_at: 2.days.ago
         )
       }
-      let!(:record2) { 
-        create(:sleep_record, 
-          user: followed_user1, 
-          sleep_at: 1.day.ago, 
+      let!(:record2) {
+        create(:sleep_record,
+          user: followed_user1,
+          sleep_at: 1.day.ago,
           wake_at: 1.day.ago + 10.hours,
           created_at: 1.day.ago
         )
