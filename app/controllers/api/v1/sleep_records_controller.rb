@@ -14,6 +14,28 @@ class Api::V1::SleepRecordsController < ApplicationController
     })
   end
 
+  def following
+    record_query = SleepRecord.from_following(current_user.id)
+                              .in_a_week
+                              .where.not(duration: nil)
+                              .includes(:user)
+                              .order(duration: :desc)
+
+    @pagy, sleep_records = pagy(record_query)
+
+    render_json_with_page(:ok, { 
+      sleep_records: sleep_records.map do |record|
+        {
+          id: record.id,
+          user_name: record.user.name,
+          sleep_at: record.sleep_at,
+          wake_at: record.wake_at,
+          duration: record.duration
+        } 
+      end
+    })
+  end
+
   def create
     sleep_record = current_user.sleep_records.create!(create_params)
 

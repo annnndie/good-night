@@ -51,4 +51,36 @@ RSpec.describe SleepRecord, type: :model do
       end
     end
   end
+
+  describe 'scopes' do
+    let(:follower) { create(:user) }
+    let(:followed_user1) { create(:user) }
+    let(:followed_user2) { create(:user) }
+    let(:unfollowed_user) { create(:user) }
+
+    before do
+      follower.follow(followed_user1)
+      follower.follow(followed_user2)
+    end
+
+    describe '.from_following' do
+      let!(:followed_record1) { create(:sleep_record, user: followed_user1) }
+      let!(:followed_record2) { create(:sleep_record, user: followed_user2) }
+      let!(:unfollowed_record) { create(:sleep_record, user: unfollowed_user) }
+
+      it 'returns records from followed users only' do
+        records = SleepRecord.from_following(follower.id)
+        
+        expect(records).to include(followed_record1, followed_record2)
+        expect(records).not_to include(unfollowed_record)
+      end
+
+      it 'returns empty result when user follows nobody' do
+        lonely_user = create(:user)
+        records = SleepRecord.from_following(lonely_user.id)
+        
+        expect(records).to be_empty
+      end
+    end
+  end
 end

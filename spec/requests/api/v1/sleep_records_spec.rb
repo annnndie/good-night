@@ -169,6 +169,54 @@ RSpec.describe 'Sleep Records API', type: :request do
     end
   end
 
+  describe 'GET /sleep_records/following' do
+    let(:followed_user1) { create(:user) }
+
+    before do
+      user.follow(followed_user1)
+    end
+
+    context 'with sleep records from followed users' do
+      let!(:record1) { 
+        create(:sleep_record, 
+          user: followed_user1, 
+          sleep_at: 2.days.ago, 
+          wake_at: 2.days.ago + 8.hours,
+          created_at: 2.days.ago
+        )
+      }
+      let!(:record2) { 
+        create(:sleep_record, 
+          user: followed_user1, 
+          sleep_at: 1.day.ago, 
+          wake_at: 1.day.ago + 10.hours,
+          created_at: 1.day.ago
+        )
+      }
+
+      it 'returns sleep records and orders records by duration DESC' do
+        get '/api/v1/sleep_records/following',
+            headers: { 'X-User-ID' => user.id },
+            as: :json
+
+        sleep_records = json_response['data']['sleep_records']
+        durations = sleep_records.map { |r| r['duration'] }
+
+        expect(response).to have_http_status(:ok)
+        expect(durations.first).to eq(36000) # 10 hours
+        expect(durations.last).to eq(28800)  # 8 hours
+      end
+    end
+
+    context 'without user header' do
+      it 'returns unauthorized' do
+        get '/api/v1/sleep_records/following', as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
   private
 
   def json_response

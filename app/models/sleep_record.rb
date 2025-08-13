@@ -5,6 +5,11 @@ class SleepRecord < ApplicationRecord
   validate :wake_at_cannot_be_cleared, if: :wake_at_changed?
   before_save :calculate_duration
 
+  scope :from_following, ->(follower_id) {
+    where("user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)", follower_id)
+  }
+  scope :in_a_week, -> { where(created_at: 7.days.ago..Time.current) }
+  
   private
 
   def wake_at_cannot_be_cleared
