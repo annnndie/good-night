@@ -4,12 +4,7 @@ class Api::V1::UsersController < ApplicationController
   def follow
     current_user.follow(@followed_user)
 
-    render_json(:created, {
-      follow: {
-        follower_id: current_user.id,
-        followed_id: @followed_user.id
-      }
-    })
+    render_json(:created)
   end
 
   def unfollow
